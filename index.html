@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Python String Functions</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+        .container {
+            background: #ffffff;
+            border-radius: 2rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
+            width: 90%;
+            max-width: 1000px;
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+            height: 90vh;
+        }
+        .correct-message {
+            color: #10B981;
+            font-weight: bold;
+        }
+        .wrong-message {
+            color: #EF4444;
+            font-weight: bold;
+        }
+        .draggable-item {
+            cursor: grab;
+            user-select: none;
+            transition: transform 0.2s ease-in-out;
+        }
+        .draggable-item:active {
+            cursor: grabbing;
+        }
+        .drop-zone {
+            transition: background-color 0.2s ease-in-out;
+        }
+        .drop-zone.hovered {
+            background-color: #e2e8f0;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center p-4">
+
+    <div class="container relative">
+        <!-- Title & Objective -->
+        <div class="text-center">
+            <h1 class="text-4xl font-bold text-gray-800 mb-2">String Functions Challenge</h1>
+            <p id="objective-text" class="text-xl font-medium text-purple-600"></p>
+        </div>
+
+        <!-- Main game area -->
+        <div class="flex-1 flex flex-col md:flex-row items-center justify-between p-4 bg-gray-50 rounded-lg shadow-inner border-4 border-dashed border-gray-200 gap-8">
+            <!-- Left side: String and dot -->
+            <div class="flex items-center justify-center w-full md:w-1/2">
+                <div id="initial-string-box" class="bg-blue-100 text-blue-800 font-mono font-bold text-2xl p-4 rounded-lg shadow-md border-2 border-blue-300">
+                    <span id="initial-string"></span>
+                </div>
+                <div id="dot-and-drop" class="text-2xl font-bold mx-2 flex items-center">
+                    <span class="text-gray-500 text-5xl font-bold">.</span>
+                    <div id="function-drop-zone" class="drop-zone w-32 h-12 bg-white rounded-lg shadow-inner border-2 border-dashed border-gray-400 flex items-center justify-center transform scale-105">
+                        <span class="text-gray-400 text-sm">Drag here</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right side: Output -->
+            <div class="flex flex-col items-center justify-center w-full md:w-1/2">
+                <p class="text-lg font-bold text-gray-600 mb-2">Output:</p>
+                <div id="output-box" class="bg-yellow-100 text-yellow-800 font-mono font-bold text-2xl p-4 rounded-lg shadow-md border-2 border-yellow-300">
+                    <span id="output-string"></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Feedback message -->
+        <div id="feedback-message" class="text-center text-2xl font-bold mt-4 h-8"></div>
+
+        <!-- Functions list at the bottom -->
+        <div class="bg-gray-200 p-4 rounded-lg shadow-inner flex flex-wrap justify-center gap-4">
+            <p class="w-full text-center text-lg font-medium text-gray-700 mb-2">Available Functions:</p>
+            <!-- Functions will be dynamically added here by JS -->
+        </div>
+    </div>
+
+    <script>
+        // Global variables for game state
+        let currentQuestion = null;
+        let draggedFunction = null;
+        const questions = [
+            {
+                string: "hello world",
+                objective: "Change the string to uppercase.",
+                function: "upper",
+                output: "HELLO WORLD"
+            },
+            {
+                string: "   Python   ",
+                objective: "Remove the extra spaces from the string.",
+                function: "strip",
+                output: "Python"
+            },
+            {
+                string: "I like dogs",
+                objective: "Change 'dogs' to 'cats'.",
+                function: "replace",
+                output: "I like cats"
+            },
+            {
+                string: "Hello Python",
+                objective: "Change the string to lowercase.",
+                function: "lower",
+                output: "hello python"
+            },
+            {
+                string: "This is a Test",
+                objective: "Change 'Test' to 'Success'.",
+                function: "replace",
+                output: "This is a Success"
+            },
+            {
+                string: "Python is great",
+                objective: "Replace 'great' with 'awesome'.",
+                function: "replace",
+                output: "Python is awesome"
+            },
+            {
+                string: "   leading and trailing   ",
+                objective: "Remove leading and trailing spaces.",
+                function: "strip",
+                output: "leading and trailing"
+            },
+            {
+                string: "python is fun",
+                objective: "Change the string to all uppercase letters.",
+                function: "upper",
+                output: "PYTHON IS FUN"
+            },
+            {
+                string: "PRACTICE MAKES PERFECT",
+                objective: "Convert the string to lowercase.",
+                function: "lower",
+                output: "practice makes perfect"
+            },
+            {
+                string: "one two three",
+                objective: "Replace 'one' with '1'.",
+                function: "replace",
+                output: "1 two three"
+            },
+            {
+                string: "this is a test",
+                objective: "Replace 'a' with 'an'.",
+                function: "replace",
+                output: "this is an test"
+            },
+            {
+                string: "   data is important   ",
+                objective: "Remove extra spaces from the string.",
+                function: "strip",
+                output: "data is important"
+            },
+            {
+                string: "data is important",
+                objective: "Convert the string to uppercase.",
+                function: "upper",
+                output: "DATA IS IMPORTANT"
+            },
+            {
+                string: "FIGHT OR FLIGHT",
+                objective: "Convert the string to lowercase.",
+                function: "lower",
+                output: "fight or flight"
+            },
+            {
+                string: "no pain, no gain",
+                objective: "Change 'no' to 'yes'.",
+                function: "replace",
+                output: "yes pain, yes gain"
+            },
+            {
+                string: "   one fish two fish   ",
+                objective: "Remove leading and trailing spaces.",
+                function: "strip",
+                output: "one fish two fish"
+            },
+            {
+                string: "the quick brown fox",
+                objective: "Change the string to uppercase.",
+                function: "upper",
+                output: "THE QUICK BROWN FOX"
+            },
+            {
+                string: "HELLO WORLD",
+                objective: "Convert the string to lowercase.",
+                function: "lower",
+                output: "hello world"
+            }
+        ];
+
+        const functionDisplayNames = {
+            "upper": "upper()",
+            "lower": "lower()",
+            "strip": "strip()",
+            "replace": "replace(old, new)"
+        };
+
+        // UI element selectors
+        const initialStringEl = document.getElementById('initial-string');
+        const outputStringEl = document.getElementById('output-string');
+        const objectiveTextEl = document.getElementById('objective-text');
+        const functionDropZoneEl = document.getElementById('function-drop-zone');
+        const feedbackMessageEl = document.getElementById('feedback-message');
+        const functionListEl = document.querySelector('.bg-gray-200');
+
+        // Function to create draggable function blocks
+        function createFunctionBlock(name) {
+            const block = document.createElement('div');
+            block.textContent = functionDisplayNames[name];
+            block.setAttribute('draggable', true);
+            block.setAttribute('data-function', name);
+            block.className = 'draggable-item px-4 py-2 bg-purple-500 text-white rounded-full shadow-lg font-bold text-sm transform transition hover:scale-105 active:scale-95';
+            return block;
+        }
+
+        // Function to render the function list
+        function renderFunctionList() {
+            // Clear existing functions
+            document.querySelectorAll('.draggable-item').forEach(el => el.remove());
+
+            const functions = ["upper", "lower", "strip", "replace"];
+            functions.forEach(func => {
+                const block = createFunctionBlock(func);
+                functionListEl.appendChild(block);
+            });
+        }
+
+        // Function to start a new question
+        function startNewQuestion() {
+            const randomIndex = Math.floor(Math.random() * questions.length);
+            currentQuestion = questions[randomIndex];
+
+            initialStringEl.textContent = currentQuestion.string;
+            outputStringEl.textContent = currentQuestion.output;
+            objectiveTextEl.textContent = `Task: ${currentQuestion.objective}`;
+            feedbackMessageEl.textContent = '';
+            
+            // Clear the drop zone
+            functionDropZoneEl.innerHTML = `<span class="text-gray-400 text-sm">Drag here</span>`;
+            draggedFunction = null;
+        }
+
+        // Function to check the answer
+        function checkAnswer(functionName) {
+            if (functionName === currentQuestion.function) {
+                feedbackMessageEl.textContent = 'Correct!';
+                feedbackMessageEl.className = 'text-center text-2xl font-bold mt-4 h-8 correct-message';
+                setTimeout(startNewQuestion, 2000); // Wait 2 seconds before new question
+            } else {
+                feedbackMessageEl.textContent = 'Wrong! Try again.';
+                feedbackMessageEl.className = 'text-center text-2xl font-bold mt-4 h-8 wrong-message';
+            }
+        }
+
+        // Event listeners for drag and drop
+        document.addEventListener('dragstart', (e) => {
+            if (e.target.classList.contains('draggable-item')) {
+                draggedFunction = e.target.getAttribute('data-function');
+                e.dataTransfer.setData('text/plain', draggedFunction);
+                e.dataTransfer.effectAllowed = 'copy';
+            }
+        });
+
+        functionDropZoneEl.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'copy';
+            functionDropZoneEl.classList.add('hovered');
+        });
+
+        functionDropZoneEl.addEventListener('dragleave', () => {
+            functionDropZoneEl.classList.remove('hovered');
+        });
+
+        functionDropZoneEl.addEventListener('drop', (e) => {
+            e.preventDefault();
+            functionDropZoneEl.classList.remove('hovered');
+            
+            // Clear any previous dropped function
+            functionDropZoneEl.innerHTML = '';
+
+            const originalBlock = document.querySelector(`[data-function="${draggedFunction}"]`);
+            if (!originalBlock) return;
+
+            const droppedBlock = originalBlock.cloneNode(true);
+            droppedBlock.style.transform = 'none'; // Reset any drag animations
+            droppedBlock.classList.remove('draggable-item');
+            droppedBlock.classList.add('dropped-item');
+            
+            functionDropZoneEl.appendChild(droppedBlock);
+            
+            // Check the answer immediately
+            checkAnswer(draggedFunction);
+        });
+
+        // Initialize the game
+        document.addEventListener('DOMContentLoaded', () => {
+            renderFunctionList();
+            startNewQuestion();
+        });
+
+    </script>
+</body>
+</html>
